@@ -49,10 +49,26 @@
         let todoText = $('#todoText');
 
         // 입력 내용 확인
-        if (todoText.val() =='') {
-            alert('할일을 입력해주세요.');
+        if (todoText.val() == '') {
+            alert('할일을 입력하세요.')
             todoText.focus();
-         } else {
+        } else {
+            // todoText.val()를  /todo/create로 보냄
+            $.ajax({
+                url: '/todo/create',
+                type: 'POST',
+                data: {
+                    'todo_text': todoText.val(),
+                },
+                success: function (response) {
+                    let id = response.id;
+                    
+                    // 추가한 할일을 li로 만들어서 ul에 추가
+                },
+                error: function () {
+                    alert('오류');
+                },
+            });
             let li = '<li class="list-group-item">';
                 li += '<div class="d-flex">';
                 li += '<div class="me-auto">';
