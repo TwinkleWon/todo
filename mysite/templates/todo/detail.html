@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if error_message %}
+<div class="alert alert-danger" role="alert">
+    {{ error_message }}
+</div>
+{% endif %}
+
+{% if question.choice_set.all %}
+    <div class="card">
+        <div class="card-header">
+            설문 목록
+        </div>
+        <form action="{% url 'polls:vote' question.id %}" method="post">
+            {% csrf_token %}
+            <ul class="list-group list-group-flush">
+                {% for choice in question.choice_set.all %}
+                    <li class="list-group-item">
+                        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="card-body">
+                <a href="{% url 'polls:index' %}" class="btn btn-success">
+                    설문 목록
+                </a>
+                <button type="submit" class="btn btn-primary">투표하기</button>
+            </div>
+        </form>
+    </div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        선택지가 없습니다.
+    </div>
+    <a href="{% url 'polls:index' %}" class="btn btn-success">
+        설문 목록
+    </a>
+{% endif %}
+
+{% endblock %}
