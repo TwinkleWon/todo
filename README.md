@@ -19,6 +19,18 @@
 1. commit : 배포할 파일에 대한 기록 남기기
 2. push : 로컬 저장소의 변경 내용을 원격 저장소로 보내기
 
+## 데이터베이스 마이그레이션
+
+## makemigrations
+
+```bash
+python manage.py makemigrations
+```
+## migrate
+```bash
+python manage.py migrate
+```
+
 ## 저장소 클론하기
 
 ## 저장소에 있는 파일 가져오기

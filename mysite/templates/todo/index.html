@@ -20,6 +20,29 @@
         </li>
         <!--// 입력 폼 -->
         
+        <!-- 할일 목록 -->
+        {% if todoList %}
+            {% for todo in todoList %}
+                <li class="list-group-item">
+                    <div class="d-flex">
+                        <div class="me-auto">
+                            <span id="text{{ todo.id }}">{{ todo.todo_text }}</span>
+                            <input type="text" class="form-control d-none input{{ todo.id }}" placeholder="할일 입력" name="todo_text" value="{{ todo.todo_text }}">
+                        </div>
+                        <div class="btn-group btn-update-delete{{ todo.id }}">
+                            <button type="button" class="btn btn-warning" onclick="update({{ todo.id }})">수정</button>
+                            <button type="button" class="btn btn-danger" onclick="delete({{ todo.id }})">삭제</button>
+                        </div>
+                        <div class="btn-group d-none div-btn-cancel{{ todo.id }}">
+                            <button type="button" class="btn btn-primary" onclick="updateConfirm({{ todo.id }})">확인</button>
+                            <button type="button" class="btn btn-danger" onclick="cancel({{ todo.id }})">취소</button>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        {% endif %}
+        <!--// 할일 목록 -->                
+        
     </ul>                    
 </div>
 <!--// content -->
@@ -27,7 +50,91 @@
 
 {% block script %}
 <script>
-    let id = 1;
+    // 쿠키 정보 가져오기
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 쿠키에서 CSRF 토큰 가져오기
+    const csrftoken = getCookie('csrftoken');
+
+    // AJAX 요청 헤더 설정(CSRF 토큰 추가)
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    // 등록
+    $('#btnCreate').on('click', function () {
+        // 변수 선언
+        let todoText = $('#todoText');
+
+        // 입력 내용 확인
+        if (todoText.val() == '') {
+            alert('할일을 입력하세요.');
+            todoText.focus();
+        } else {
+            let data = JSON.stringify({
+                'todo_text': todoText.val(),
+            });
+
+            // todoText.val()를 /todo/create/로 보내기
+            $.ajax({
+                url: '/todo/create/',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: data,
+                complete: function (xhr, status) {
+                    // toDoText 내용 비우기
+                    todoText.val('');
+                },
+                success: function (response) {
+                    // console.log(response);
+                    let id = response.id;
+                    let todo_text = response.todo_text;
+
+                    // 추가한 할일을 li로 만들어서 ul에 추가
+                    let li = '<li class="list-group-item">';
+                        li += '<div class="d-flex">';
+                        li += '<div class="me-auto">';
+                        li += '<span id="text' + id + '">' + todo_text + '</span>';
+                        li += '<input type="text" class="form-control d-none input' + id + '" placeholder="할일 입력" name="todo_text" value="' + todoText.val() + '">';
+                        li += '</div>';
+                        li += '<div class="btn-group btn-update-delete' + id + '">';
+                        li += '<button type="button" class="btn btn-warning" onclick="update(' + id + ')">수정</button>';
+                        li += '<button type="button" class="btn btn-danger" onclick="delete(' + id + ')">삭제</button>';
+                        li += '</div>';
+                        li += '<div class="btn-group d-none div-btn-cancel' + id + '">';
+                        li += '<button type="button" class="btn btn-primary" onclick="updateConfirm(' + id + ')">확인</button>';
+                        li += '<button type="button" class="btn btn-danger" onclick="cancel(' + id + ')">취소</button>';
+                        li += '</div>';
+                        li += '</div>';
+                        li += '</li>';
+                
+                        // li를 추가
+                        $('#todoList').append(li);
+                },
+                error: function () {
+                    alert('오류');
+                },
+            });
+        }
+    });
 
     function update(id) {
         $('#text' + id).addClass('d-none');
@@ -42,58 +149,5 @@
         $('.input' + id).addClass('d-none');
         $('.div-btn-cancel' + id).addClass('d-none');
     }
-
-    // 등록
-    $('#btnCreate').on('click', function () {
-        // 변수 선언
-        let todoText = $('#todoText');
-
-        // 입력 내용 확인
-        if (todoText.val() == '') {
-            alert('할일을 입력하세요.')
-            todoText.focus();
-        } else {
-            // todoText.val()를  /todo/create로 보냄
-            $.ajax({
-                url: '/todo/create',
-                type: 'POST',
-                data: {
-                    'todo_text': todoText.val(),
-                },
-                success: function (response) {
-                    let id = response.id;
-                    
-                    // 추가한 할일을 li로 만들어서 ul에 추가
-                },
-                error: function () {
-                    alert('오류');
-                },
-            });
-            let li = '<li class="list-group-item">';
-                li += '<div class="d-flex">';
-                li += '<div class="me-auto">';
-                li += '<span id="text' + id + '">' + todoText.val() + '</span>';
-                li += '<input type="text" class="form-control d-none input' + id + '" placeholder="할일 입력" name="todo_text" value="' + todoText.val() + '">';
-                li += '</div>';
-                li += '<div class="btn-group btn-update-delete' + id + '">';
-                li += '<button type="button" class="btn btn-warning" onclick="update(' + id + ')">수정</button>';
-                li += '<button type="button" class="btn btn-danger" onclick="delete(' + id + ')">삭제</button>';
-                li += '</div>';
-                li += '<div class="btn-group d-none div-btn-cancel' + id + '">';
-                li += '<button type="button" class="btn btn-primary" onclick="updateConfirm(' + id + ')">확인</button>';
-                li += '<button type="button" class="btn btn-danger" onclick="cancel(' + id + ')">취소</button>';
-                li += '</div>';
-                li += '</div>';
-                li += '</li>';
-        
-                // li를 추가
-                $('#todoList').append(li);
-        
-                // toDoText 내용 비우기
-                todoText.val('');
-        
-                id++;
-        }
-    });
 </script>
 {% endblock %}
