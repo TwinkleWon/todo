@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
 <!-- content -->
-<div class="card col-md-4">
+<div class="card col-md-4" id="todoCard">
     <div class="card-header">
         할일 목록
     </div>
@@ -26,7 +27,9 @@
                 <li class="list-group-item" id="li{{ todo.id }}">
                     <div class="d-flex">
                         <div class="me-auto">
-                            <span id="spanText{{ todo.id }}" class="span-todo-text">{{ todo.todo_text }}</span>
+                            <span id="spanText{{ todo.id }}" class="span-todo-text">
+                                <a href="/todo/{{ todo.id }}/">{{ todo.todo_text }}</a>
+                            </span>
                             <input type="text" class="form-control d-none input-text{{ todo.id }} input-todo-text" placeholder="할일 입력" name="todo_text" value="{{ todo.todo_text }}">
                         </div>
                         <div class="btn-group btn-update-delete{{ todo.id }}">
@@ -100,7 +103,6 @@
                 contentType: 'application/json',
                 data: data,
                 success: function (response) {
-                    // console.log(response);
                     let id = response.id;
                     let todo_text = response.todo_text;
 
@@ -108,7 +110,9 @@
                     let li = '<li class="list-group-item" id="li' + id + '">';
                         li += '<div class="d-flex">';
                         li += '<div class="me-auto">';
-                        li += '<span id="spanText' + id + '" class="span-todo-text">' + todo_text + '</span>';
+                        li +='<span id="spanText' + id + '" class="span-todo-text">';
+                        li +='<a href="/todo/' + id + '/">' + todo_text + '</a>';
+                        li +='</span>';
                         li += '<input type="text" class="form-control d-none input-text' + id + ' input-todo-text" placeholder="할일 입력" name="todo_text" value="' + todoText.val() + '">';
                         li += '</div>';
                         li += '<div class="btn-group btn-update-delete' + id + '">';
@@ -254,3 +258,5 @@
     }
 </script>
 {% endblock %}
+
+
