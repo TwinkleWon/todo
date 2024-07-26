@@ -9,11 +9,11 @@
             {% csrf_token %}
             <div class="mb-3">
               <label for="email" class="form-label">email</label>
-              <input type="email" class="form-control" id="email" name="email">
+              <input type="email" class="form-control" id="email" name="email" value = "{{ user.email }}">
             </div>
             <div class="mb-3">
               <label for="last_name" class="form-label">name</label>
-              <input type="text" class="form-control" id="last_name" name="last_name">
+              <input type="text" class="form-control" id="last_name" name="last_name" value = "{{ user.username }}">
             </div>
             <button type="submit" class="btn btn-primary">프로필 수정</button>
         </form>
